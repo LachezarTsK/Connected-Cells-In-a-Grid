@@ -1,208 +1,141 @@
-import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class Solution {
+	/**
+	 * Input matrix. This implementation does not retain the original state of the
+	 * input matrix.
+	 */
+	private static int[][] grid;
 
 	public static void main(String[] args) {
-
-		Scanner reader = new Scanner(System.in);
-		int numberOfRows = reader.nextInt();
-		int numberOfColumns = reader.nextInt();
-		int[][] matrix = new int[numberOfRows][numberOfColumns];
-		for (int matrix_i = 0; matrix_i < numberOfRows; matrix_i++) {
-			for (int matrix_j = 0; matrix_j < numberOfColumns; matrix_j++) {
-				matrix[matrix_i][matrix_j] = reader.nextInt();
+		Scanner scanner = new Scanner(System.in);
+		int rows = scanner.nextInt();
+		int columns = scanner.nextInt();
+		grid = new int[rows][columns];
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < columns; c++) {
+				grid[r][c] = scanner.nextInt();
 			}
 		}
-		int result = connectedCell(matrix);
-		System.out.println(result);
-
+		scanner.close();
+		System.out.println(getMaximumRegionOfConnectedCells(rows, columns));
 	}
 
-	public static int connectedCell(int[][] matrix) {
-		LinkedList<Pair> x_y = new LinkedList<Pair>();
-		int largestRegion = 0;
-		int counter = 0;
-
-		for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j < matrix[i].length; j++) {
-
-				if (matrix[i][j] == 1) {
-					x_y.add(new Pair(i, j));
-					matrix[i][j] = 0;
-					counter++;
+	/**
+	 * The method searches for the largest region of connected cells (horizontally,
+	 * vertically, or diagonally) with value of "1".
+	 * 
+	 * @return An integer, representing number of such cell in the maximum region.
+	 */
+	private static int getMaximumRegionOfConnectedCells(int rows, int columns) {
+		int maximumRegion = 0;
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < columns; c++) {
+				if (grid[r][c] == 1) {
+					maximumRegion = Math.max(searchForConnectedCells(r, c), maximumRegion);
 				}
-
-				for (int i_coord = 0; i_coord < x_y.size(); i_coord++) {
-
-					if (checkCell_PrevRow_NextColumn(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX() - 1;
-						int y = x_y.get(i_coord).getY() + 1;
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-
-					if (checkCell_SameRow_NextColumn(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX();
-						int y = x_y.get(i_coord).getY() + 1;
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-
-					if (checkCell_NextRow_NextColumn(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX() + 1;
-						int y = x_y.get(i_coord).getY() + 1;
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-
-					if (checkCell_NextRow_SameColum(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX() + 1;
-						int y = x_y.get(i_coord).getY();
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-
-					if (checkCell_NextRow_PrevColumn(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX() + 1;
-						int y = x_y.get(i_coord).getY() - 1;
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-
-					if (checkCell_SameRow_PrevColumn(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX();
-						int y = x_y.get(i_coord).getY() - 1;
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-
-					if (checkCell_PrevRow_PrevColumn(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX() - 1;
-						int y = x_y.get(i_coord).getY() - 1;
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-
-					if (checkCell_PrevRow_SameColumn(x_y.get(i_coord).getX(), x_y.get(i_coord).getY(), matrix)) {
-						int x = x_y.get(i_coord).getX() - 1;
-						int y = x_y.get(i_coord).getY();
-						x_y.add(new Pair(x, y));
-						matrix[x][y] = 0;
-						counter++;
-					}
-				}
-
-			//	System.out.println(x_y);
-				if (counter > largestRegion) {
-					largestRegion = counter;
-				}
-				x_y = new LinkedList<Pair>();
-				counter = 0;
 			}
 		}
-		return largestRegion;
+		return maximumRegion;
 	}
 
-	public static boolean checkCell_PrevRow_NextColumn(int row, int column, int[][] matrix) {
-		if (row - 1 >= 0 && column + 1 < matrix[0].length) {
-			if (matrix[row - 1][column + 1] == 1) {
-				return true;
+	/**
+	 * The method searches (Depth First Search) for connected cells with value of
+	 * "1". In order to prevent multiple visits of the same cell, a visited cell is
+	 * ascribed a value of "0".
+	 * 
+	 * @return An integer, representing the number of connected cells in the current
+	 *         region.
+	 */
+	private static int searchForConnectedCells(int row, int column) {
+		Stack<Integer> queue_rows = new Stack<Integer>();
+		Stack<Integer> queue_columns = new Stack<Integer>();
+		queue_rows.add(row);
+		queue_columns.add(column);
+		int counter = grid[row][column]--;
+
+		while (!queue_rows.isEmpty()) {
+			row = queue_rows.pop();
+			column = queue_columns.pop();
+			/**
+			 * Neighboring cell to the left.
+			 */
+			if (isCell(row, column - 1) && grid[row][column - 1] == 1) {
+				queue_rows.add(row);
+				queue_columns.add(column - 1);
+				counter += grid[row][column - 1]--;
+			}
+			/**
+			 * Neighboring cell to the right.
+			 */
+			if (isCell(row, column + 1) && grid[row][column + 1] == 1) {
+				queue_rows.add(row);
+				queue_columns.add(column + 1);
+				counter += grid[row][column + 1]--;
+			}
+			/**
+			 * Neighboring cell from below.
+			 */
+			if (isCell(row - 1, column) && grid[row - 1][column] == 1) {
+				queue_rows.add(row - 1);
+				queue_columns.add(column);
+				counter += grid[row - 1][column]--;
+			}
+			/**
+			 * Neighboring cell from above.
+			 */
+			if (isCell(row + 1, column) && grid[row + 1][column] == 1) {
+				queue_rows.add(row + 1);
+				queue_columns.add(column);
+				counter += grid[row + 1][column]--;
+			}
+			/**
+			 * Neighboring cell from above, to the right.
+			 */
+			if (isCell(row + 1, column + 1) && grid[row + 1][column + 1] == 1) {
+				queue_rows.add(row + 1);
+				queue_columns.add(column + 1);
+				counter += grid[row + 1][column + 1]--;
+			}
+			/**
+			 * Neighboring cell from above, to the left.
+			 */
+			if (isCell(row + 1, column - 1) && grid[row + 1][column - 1] == 1) {
+				queue_rows.add(row + 1);
+				queue_columns.add(column - 1);
+				counter += grid[row + 1][column - 1]--;
+			}
+			/**
+			 * Neighboring cell from below, to the right.
+			 */
+			if (isCell(row - 1, column + 1) && grid[row - 1][column + 1] == 1) {
+				queue_rows.add(row - 1);
+				queue_columns.add(column + 1);
+				counter += grid[row - 1][column + 1]--;
+			}
+			/**
+			 * Neighboring cell from below, to the left.
+			 */
+			if (isCell(row - 1, column - 1) && grid[row - 1][column - 1] == 1) {
+				queue_rows.add(row - 1);
+				queue_columns.add(column - 1);
+				counter += grid[row - 1][column - 1]--;
 			}
 		}
-		return false;
+		return counter;
 	}
 
-	public static boolean checkCell_SameRow_NextColumn(int row, int column, int[][] matrix) {
-		if (column + 1 < matrix[0].length) {
-			if (matrix[row][column + 1] == 1) {
-				return true;
-			}
+	/**
+	 * The method checks whether the neighboring row and column are within the
+	 * boundaries of the grid.
+	 * 
+	 * @return true, if they are within the boundaries. Otherwise, returns false.
+	 */
+	private static boolean isCell(int row, int column) {
+		if (row < 0 || row >= grid.length || column < 0 || column >= grid[row].length) {
+			return false;
 		}
-		return false;
-	}
-
-	public static boolean checkCell_NextRow_NextColumn(int row, int column, int[][] matrix) {
-		if (row + 1 < matrix.length && column + 1 < matrix[0].length) {
-			if (matrix[row + 1][column + 1] == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean checkCell_NextRow_SameColum(int row, int column, int[][] matrix) {
-		if (row + 1 < matrix.length) {
-			if (matrix[row + 1][column] == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean checkCell_NextRow_PrevColumn(int row, int column, int[][] matrix) {
-		if (row + 1 < matrix.length && column - 1 >= 0) {
-			if (matrix[row + 1][column - 1] == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean checkCell_SameRow_PrevColumn(int row, int column, int[][] matrix) {
-		if (column - 1 >= 0) {
-			if (matrix[row][column - 1] == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean checkCell_PrevRow_PrevColumn(int row, int column, int[][] matrix) {
-		if (row - 1 >= 0 && column - 1 >= 0) {
-			if (matrix[row - 1][column - 1] == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean checkCell_PrevRow_SameColumn(int row, int column, int[][] matrix) {
-		if (row - 1 >= 0) {
-			if (matrix[row - 1][column] == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-}
-
-class Pair {
-
-	private int x;
-	private int y;
-
-	public Pair(int firstCoord, int secondCoord) {
-		this.x = firstCoord;
-		this.y = secondCoord;
-	}
-
-	public int getX() {
-		return this.x;
-	}
-
-	public int getY() {
-		return this.y;
-	}
-
-	public String toString() {
-		return this.x + "&" + this.y;
+		return true;
 	}
 }
