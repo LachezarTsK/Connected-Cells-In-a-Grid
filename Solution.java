@@ -3,8 +3,8 @@ import java.util.Stack;
 
 public class Solution {
 	/**
-	 * Input matrix. This implementation does not retain the original state of the
-	 * input matrix.
+	 * Input matrix. This implementation does not retain the original state 
+	 * of the input matrix.
 	 */
 	private static int[][] grid;
 
@@ -23,8 +23,8 @@ public class Solution {
 	}
 
 	/**
-	 * The method searches for the largest region of connected cells (horizontally,
-	 * vertically, or diagonally) with value of "1".
+	 * The method searches for the largest region of connected cells 
+	 * (horizontally, vertically, or diagonally) with value of "1".
 	 * 
 	 * @return An integer, representing number of such cell in the maximum region.
 	 */
@@ -42,8 +42,8 @@ public class Solution {
 
 	/**
 	 * The method searches (Depth First Search) for connected cells with value of
-	 * "1". In order to prevent multiple visits of the same cell, a visited cell is
-	 * ascribed a value of "0".
+	 * "1". In order to prevent multiple visits of the same cell, a visited cell 
+	 * is ascribed a value of "0".
 	 * 
 	 * @return An integer, representing the number of connected cells in the current
 	 *         region.
@@ -127,8 +127,8 @@ public class Solution {
 	}
 
 	/**
-	 * The method checks whether the neighboring row and column are within the
-	 * boundaries of the grid.
+	 * The method checks whether the neighboring row and column are within 
+	 * the boundaries of the grid.
 	 * 
 	 * @return true, if they are within the boundaries. Otherwise, returns false.
 	 */
